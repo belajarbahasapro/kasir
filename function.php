@@ -22,6 +22,7 @@ if (isset($_POST['login'])){
         </script>';
     }
 }
+
 if(isset($_POST['tambahproduk'])){
     //deskripsi initial variabel
     $nama_produk = $_POST['nama_produk'];
@@ -107,16 +108,35 @@ if(isset($_POST['addproduk'])){
     $idp = $_POST['idp'];
     $qty = $_POST['qty'];
 
+    //hitung stock sekarang ada berapa
+    $hitung1 = mysqli_query($koneksi, "SELECT * FROM produk WHERE id_produk='$id_produk'");
+    $hitung2 = mysqli_fetch_array($hitung1);
+    $stocksekarang = $hitung2['stock'];
+
+    if($stocksekarang> = qty){
+    //kurangin stocknya dengan jumlah yang akan dikeluarkan
+    $selisih = $stocksekarang - $qty;
+
+    //stocknya cukup
     $insert = mysqli_query($koneksi, "INSERT INTO detail_pesanan (id_pesanan, id_produk, qty) VALUES 
     ('$idp', '$id_produk', '$qty')");
+    $update = mysqli_query($koneksi,"UPDATE produk SET stock='$selisih' WHERE id_produk='$id_produk'");
 
-    if ($insert){
+    if ($insert && $update) {
         header('location:view.php?idp=' . $idp);
     }else {
         echo'
         <script>
         alert("Gagal Tambah Produk")
-        window.location.href="view.php"' . $idp .'
+        window.location.href="view.php' . $idp .'"
         </script>';
-    } 
+    }
+    }else {
+        echo'
+        <script>
+        alert("Stock tidak cukup")
+        window.location.href="view.php' . $idp .'"
+        </script>';
+    }
+
 }
